@@ -20,22 +20,13 @@ checkpoint_path = "checkpoint/checkpoint.t7"
 # Starting AWS Session
 logging.info("Creating AWS Session")
 try:
-    session = boto3.Session(
-    aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID'],
-    aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY'],
-    region_name = os.environ['AWS_REGION']
-    )
+    session = boto3.Session()
 except:
     logging.error("AWS Session Failed: Check Access Key and Permissions")
     quit()
 
 # Getting checkpoint file
-s3 = boto3.client(
-    's3',
-    aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID'],
-    aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY'],
-    region_name = os.environ['AWS_REGION']
-)
+s3 = boto3.client('s3')
 logging.info("Downloading checkpoint file: %s from S3" % checkpoint_path)
 s3.download_file(bucketName, checkpoint_path, checkpoint_path)
 
@@ -131,9 +122,7 @@ if __name__ == '__main__':
 
         # Delete received message from queue
         sqs = boto3.client('sqs',
-            aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID'],
-            aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY'],
-            region_name = os.environ['AWS_REGION'])
+            region_name = 'us-east-1')
         sqs.delete_message(
             QueueUrl=QUEUE_URL,
             ReceiptHandle=receipt_handle

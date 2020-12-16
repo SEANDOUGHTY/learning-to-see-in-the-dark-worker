@@ -41,9 +41,7 @@ def inferTransform(im):
 def read_queue(queue_url):
     # Receive message from SQS queue
     sqs = boto3.client('sqs',
-        aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID'],
-        aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY'],
-        region_name = os.environ['AWS_REGION'])
+        region_name = 'us-east-1')
     
     response = sqs.receive_message(
         QueueUrl=queue_url,
@@ -66,9 +64,7 @@ def read_queue(queue_url):
 
 def terminate_instance():
     client = boto3.client('ec2',
-    aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID'],
-    aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY'],
-    region_name = os.environ['AWS_REGION'])
+    region_name = 'us-east-1')
 
     response = client.describe_instances(
     Filters=[
