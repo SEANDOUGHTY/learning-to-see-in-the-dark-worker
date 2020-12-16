@@ -30,7 +30,13 @@ except:
     quit()
 
 # Getting checkpoint file
-s3 = boto3.client('s3')
+s3 = boto3.client(
+    's3',
+    aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID'],
+    aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY'],
+    region_name = os.environ['AWS_REGION']
+)
+logging.info("Downloading checkpoint file: %s from S3" % checkpoint_path)
 s3.download_file(bucketName, checkpoint_path, checkpoint_path)
 
 # Setting Device
@@ -46,6 +52,7 @@ except:
     logging.error("Model Unsuccessfully Loaded")
     quit()
 
+logging.info("Model Successfully Loaded")
 #set model to evaluate mode
 model.eval()
 
@@ -56,7 +63,7 @@ if __name__ == '__main__':
         [message, receipt_handle] = read_queue(QUEUE_URL)
         if message == -1:
             ellapsed_seconds = time.time() - last_job
-            print('Queue is empty %d seconds until shutdown' % int(TIMEOUT-ellapsed_seconds))
+            logging.info('Queue is empty %d seconds until shutdown' % int(TIMEOUT-ellapsed_seconds))
             if ellapsed_seconds > TIMEOUT:
                 break
             else:
@@ -64,11 +71,13 @@ if __name__ == '__main__':
                 continue
 
         [fileName, ratio] = message['Body'].split(', ')       
+        logging.info("Recieved message to process: %s with ratio: %s" % (fileName, ratio))
 
         ratio = float(ratio)
         inputImage = "inputs/" + fileName
         outputImage = "outputs/" + 'output_' + fileName[6:]
         
+        logging.info("Downloading image from S3")
         try:
             s3 = session.resource('s3')
             object = s3.Object(bucketName, inputImage)
@@ -121,7 +130,10 @@ if __name__ == '__main__':
 
 
         # Delete received message from queue
-        sqs = boto3.client('sqs')
+        sqs = boto3.client('sqs',
+            aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID'],
+            aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY'],
+            region_name = os.environ['AWS_REGION'])
         sqs.delete_message(
             QueueUrl=QUEUE_URL,
             ReceiptHandle=receipt_handle

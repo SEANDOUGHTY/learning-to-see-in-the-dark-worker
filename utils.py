@@ -4,6 +4,7 @@ import math
 import boto3
 from PIL import Image
 import cv2
+import os
 
 
 def importImage(im, ratio):
@@ -39,10 +40,14 @@ def inferTransform(im):
 
 def read_queue(queue_url):
     # Receive message from SQS queue
-    sqs = boto3.client('sqs')
+    sqs = boto3.client('sqs',
+        aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID'],
+        aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY'],
+        region_name = os.environ['AWS_REGION'])
+    
     response = sqs.receive_message(
         QueueUrl=queue_url,
-        AttributeNames=[
+        AttributeNames=[    
             'SentTimestamp'
         ],
         MaxNumberOfMessages=1,
@@ -60,7 +65,11 @@ def read_queue(queue_url):
         return [-1, -1]
 
 def terminate_instance():
-    client = boto3.client('ec2')
+    client = boto3.client('ec2',
+    aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID'],
+    aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY'],
+    region_name = os.environ['AWS_REGION'])
+
     response = client.describe_instances(
     Filters=[
         {
