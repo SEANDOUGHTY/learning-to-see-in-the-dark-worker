@@ -1,0 +1,14 @@
+version: "3.7"
+
+services:
+  inference:
+    build: .
+    container_name: inference
+    restart: always
+    volumes: 
+      - ~/Desktop/learning-to-see-in-the-dark-worker/src:/app/src
+    environment: 
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_REGION
+
