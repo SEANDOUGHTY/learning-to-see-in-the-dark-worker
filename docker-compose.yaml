@@ -6,7 +6,7 @@ services:
     container_name: inference
     restart: always
     volumes: 
-      - ~/../learning-to-see-in-the-dark-worker/src/
+      - /learning-to-see-in-the-dark-worker/src/
     environment: 
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
