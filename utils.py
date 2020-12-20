@@ -77,3 +77,5 @@ def terminate_instance():
     InstanceIds=[
         instance
     ],)
+
+    
