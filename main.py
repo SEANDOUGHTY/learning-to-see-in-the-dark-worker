@@ -94,31 +94,30 @@ if __name__ == '__main__':
             logging.info("Performing Inference on Input Image")
             try:
                 output = model(tensor)
+
+                # Post processing for RGB output
+                output = output.to('cpu').numpy() * 255
+                output = output.squeeze()
+                output = np.transpose(output, (2, 1, 0)).astype('uint8')
+                output = Image.fromarray(output).convert("RGB")
+                #output.show()
+
+                # Output buffer for upload to S3
+                buffer = io.BytesIO()            
+                output.save(buffer, "PNG")
+                buffer.seek(0) # rewind pointer back to start
+
+                logging.info("Uploading Image to %s", outputImage)
+                try:
+                    s3.Bucket(bucketName).put_object(
+                        Key=outputImage,
+                        Body=buffer,
+                        ContentType='image/png',
+                    )
+                except:
+                    logging.error("Failed to Upload Image")
             except:
-                logging.error("Inference Failed")
-            
-            # Post processing for RGB output
-            output = output.to('cpu').numpy() * 255
-            output = output.squeeze()
-            output = np.transpose(output, (2, 1, 0)).astype('uint8')
-            output = Image.fromarray(output).convert("RGB")
-            #output.show()
-
-            # Output buffer for upload to S3
-            buffer = io.BytesIO()            
-            output.save(buffer, "PNG")
-            buffer.seek(0) # rewind pointer back to start
-
-            logging.info("Uploading Image to %s", outputImage)
-            try:
-                s3.Bucket(bucketName).put_object(
-                    Key=outputImage,
-                    Body=buffer,
-                    ContentType='image/png',
-                )
-            except:
-                logging.error("Failed to Upload Image")
-
+                logging.error("Inference Failed")  
 
         # Delete received message from queue
         sqs = boto3.client('sqs',
